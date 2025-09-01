@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>UMD MAP </title>
+  <meta charset="utf-8" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+  <style>
+    #map {
+       position: absolute;
+       height: 100%;
+       width: 100%;
+       background-color: #0fa8d2
+    }
+  </style>
+</head>
+<body>
+
+<div id="map"></div>
+
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+<script>
+
+  const imageWidth = 8192;
+  const imageHeight = 8192;
+  const imageBounds = [[0, 0], [imageHeight, imageWidth]];
+
+  const map = L.map('map', {
+    crs: L.CRS.Simple,
+    minZoom: -4,
+    maxZoom: 2
+  });
+
+  L.imageOverlay('map.png', imageBounds).addTo(map);
+  map.fitBounds(imageBounds);
+
+  const offsetX = 6487;
+  const offsetY = 9474;
+
+  function gtaToLeaflet(gameX, gameY) {
+    const leafletX = gameX + offsetX;
+    const leafletY = -gameY + offsetY;
+    return [leafletY, leafletX];
+  }
+
+  function leafletToGTA(leafletX, leafletY) {
+    const gameX = leafletX - offsetX;
+    const gameY = -(leafletY - offsetY);
+    return [gameX, gameY];
+  }
+
+  function customIcon(iconName) {
+    return L.icon({
+      iconUrl: iconName + '.png',
+      iconSize: [20, 20],
+      iconAnchor: [16, 32],
+      popupAnchor: [-10, -27]
+    });
+  }
+
+  const gtaLocations = [
+    { name: "โรงพยาบาลกลาง", x: -2504, y: 7728, icon: "01" },
+
+  ];
+
+  gtaLocations.forEach(loc => {
+    const [y, x] = gtaToLeaflet(loc.x, loc.y);
+    L.marker([y, x], { icon: customIcon(loc.icon) })
+      .addTo(map)
+      .bindPopup(`${loc.name}<br>GTA (${loc.x}, ${loc.y})`);
+  });
+
+  map.on('click', function (e) {
+    const lx = e.latlng.lng;
+    const ly = e.latlng.lat;
+    const [gx, gy] = leafletToGTA(lx, ly);
+    L.popup()
+      .setLatLng(e.latlng)
+      .setContent(`Leaflet: (${lx.toFixed(0)}, ${ly.toFixed(0)})<br>GTA: (${gx.toFixed(0)}, ${gy.toFixed(0)})`)
+      .openOn(map);
+    console.log(`CLICK: Leaflet(${lx}, ${ly}) -> GTA(${gx}, ${gy})`);
+  });
+
+</script>
+
+</body>
+</html>

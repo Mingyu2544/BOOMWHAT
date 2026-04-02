@@ -1079,7 +1079,16 @@
     console.log(`CLICK: Leaflet(${lx}, ${ly}) -> GTA(${gx}, ${gy})`);
   });
 
+  fetch("http://localhost:3000/status", {
+    credentials: "include"
+})
+.then(res => res.json())
+.then(data => {
+    if (!data.login || !data.hasRole) {
+        document.body.innerHTML = "❌ ไม่มีสิทธิ์เข้าใช้งาน";
+    }
+});
 </script>
-
+  
 </body>
 </html>
